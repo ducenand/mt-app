@@ -1,7 +1,15 @@
 import Koa from 'koa'
-// const Koa = require('koa')
+
 const consola = require('consola')
-const { Nuxt, Builder } = require('nuxt')
+const {Nuxt, Builder} = require('nuxt')
+
+import mongoose from 'mongoose'
+import bodyParser from 'koa-bodyparser'
+import session from  'koa-generic-session'
+import redisStore from 'koa-redis'
+import dbConfig from './dbs/config'
+import users from './interface/users'
+import json from 'koa-json'
 
 const app = new Koa()
 const host = process.env.HOST || '127.0.0.1'
@@ -10,6 +18,17 @@ const port = process.env.PORT || 3000
 // Import and Set Nuxt.js options
 let config = require('../nuxt.config.js')
 config.dev = !(app.env === 'production')
+app.use(json())
+app.use(bodyParser({
+  extendTypes: ['json', 'form', 'text']
+}))
+app.keys = ['keys','keykeys']
+app.use(session({
+  store: redisStore()
+}))
+mongoose.connect(dbConfig.dbs, {
+  useNewUrlParser: true
+})
 
 async function start() {
   // Instantiate nuxt.js
@@ -20,7 +39,7 @@ async function start() {
     const builder = new Builder(nuxt)
     await builder.build()
   }
-
+  app.use(users.routes()).use(users.allowedMethods())
   app.use(ctx => {
     ctx.status = 200 // koa defaults to 404 when it sees that status is unset
 
