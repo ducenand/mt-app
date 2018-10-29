@@ -36,6 +36,7 @@
             round
             @click="sendMsg">发送验证码
           </el-button>
+          <span class="status">{{ statusMsg }}</span>
         </el-form-item>
         <el-form-item
           label="验证码"
@@ -77,6 +78,7 @@
   </div>
 </template>
 <script>
+  import CryptoJs from  'crypto-js'
   export default {
     layout: 'blank',
     data() {
@@ -134,14 +136,14 @@
           if (valid) {
             this.$axios.post('/users/signup', {
               username: window.encodeURIComponent(self.ruleForm.name),
-              password: self.ruleForm.pwd,
+              password: CryptoJs.MD5(self.ruleForm.pwd).toString(),
               email: self.ruleForm.email,
               code: self.ruleForm.code
             }).then(({status, data}) => {
               console.log(status);
               if (status === 200) {
                 if (data && data.code === 0) {
-                  location.href = '/login'
+                   location.href = '/login'
                 } else {
                   self.error = data.msg
                 }

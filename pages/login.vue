@@ -23,7 +23,7 @@
         <el-input
           v-model="username"
           prefix-icon="profile"
-          type="password"/>
+          type="text"/>
         <el-input
           v-model="password"
           prefix-icon="password"
@@ -43,6 +43,7 @@
   </div>
 </template>
 <script>
+  import CryptoJs from 'crypto-js'
   export default {
     layout: 'blank',
     components: {},
@@ -61,8 +62,8 @@
         let self = this
         self.$axios.post('/users/signin', {
           username: window.encodeURIComponent(self.username),
-          password: self.password
-        }).then((status, data) => {
+          password: CryptoJs.MD5(self.password).toString()
+        }).then(({status, data}) => {
           if (status === 200) {
             if (data && data.code === 0) {
               location.href = '/'
